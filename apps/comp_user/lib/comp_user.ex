@@ -13,6 +13,12 @@ defmodule CompUser do
 
   """
   def hello do
-    :world
+    :world_ex
   end
+
+  def inc(val) do
+    val + :foo
+  end
+
+  def foo, do: :bar
 end

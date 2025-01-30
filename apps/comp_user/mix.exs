@@ -13,7 +13,14 @@ defmodule CompUser.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       compilers: [:foo_two, :foo | Mix.compilers()],
-      listeners: [CompListener]
+      listeners: [CompListener],
+      aliases: aliases()
+    ]
+  end
+
+  defp aliases do
+    [
+      compile: ["check.file", "compile"]
     ]
   end
 

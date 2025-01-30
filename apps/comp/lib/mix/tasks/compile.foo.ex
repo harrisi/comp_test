@@ -2,28 +2,34 @@ defmodule Mix.Tasks.Compile.Foo do
   use Mix.Task.Compiler
 
   @impl true
-  def run(_args) do
-    IO.inspect("compiling")
+  def run(args) do
+    IO.inspect(args, label: "compiling")
+
+    IO.inspect(System.argv(), label: "argv")
 
     Mix.Task.Compiler.after_compiler(:foo, &my_after/1)
 
-    {:ok, [
+    {if("--warnings-as-errors" in System.argv(), do: :error, else: :ok), [
       %Mix.Task.Compiler.Diagnostic{
         compiler_name: "foo",
         details: "details",
         file: ".",
         message: "message",
         position: 0,
-        severity: :warning,
+        severity: if("--warnings-as-errors" in args, do: :error, else: :warning),
         stacktrace: [{:foo, :bar, 2, 0}]
       }
     ]}
   end
 
-  def my_after({_status, _diagnostics} = input) do
+  def my_after({status, diagnostics} = input) do
     IO.inspect(input, label: "my_after")
 
-    input
+    # Mix.shell().error(inspect diagnostics)
+    IO.warn(inspect diagnostics)
+
+    # {:error, Enum.map(diagnostics, fn d -> put_in(d.severity, :error) end) |> IO.inspect(label: "mapped")}
+    {status, diagnostics}
   end
 
   @impl true
@@ -36,6 +42,7 @@ defmodule Mix.Tasks.Compile.Foo do
         message: "message (from diagnostics/0)",
         position: 0,
         severity: :warning,
+        # severity: if("--warnings-as-errors" in args, do: :error, else: :warning),
         stacktrace: [{:foo, :bar, 2, 0}]
       }
     ]
